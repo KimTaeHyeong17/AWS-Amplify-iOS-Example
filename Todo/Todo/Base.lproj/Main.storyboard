@@ -71,6 +71,7 @@
                                         </tableViewCellContentView>
                                         <connections>
                                             <outlet property="lbPriority" destination="0Tv-M4-1xt" id="1T6-s3-Wls"/>
+                                            <outlet property="lbTitle" destination="ndp-YL-pJs" id="eY3-E1-SAu"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>

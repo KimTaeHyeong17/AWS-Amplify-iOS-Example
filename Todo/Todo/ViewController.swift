@@ -40,6 +40,7 @@ class ViewController: UIViewController {
         let saveAction = UIAlertAction(title: "추가", style: UIAlertAction.Style.default, handler: { alert -> Void in
             let firstTextField = alertController.textFields![0] as UITextField
             let secondTextField = alertController.textFields![1] as UITextField
+            
             if firstTextField.text != nil && secondTextField.text != nil {
                 self.addTodo(firstTextField.text! , Priority.low, secondTextField.text!)
             }
@@ -71,6 +72,7 @@ class ViewController: UIViewController {
         Amplify.DataStore.query(Todo.self, completion: { result in
             switch(result) {
             case .success(let todos):
+                todoArrayList.removeAll()
                 for todo in todos {
                     todoArrayList.append(todo)
                     print("==== Todo ====")
@@ -82,7 +84,9 @@ class ViewController: UIViewController {
                         print("Description: \(description)")
                     }
                 }
-                tableView.reloadData()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
             case .failure(let error):
                 print("Could not query DataStore: \(error)")
             }
@@ -115,7 +119,7 @@ class ViewController: UIViewController {
     }
     private func deleteTodo(_ title : String){
         Amplify.DataStore.query(Todo.self,
-                                where: Todo.keys.name.eq("title"),
+                                where: Todo.keys.name.eq(title),
                                 completion: { result in
                                     switch(result) {
                                     case .success(let todos):
@@ -128,6 +132,7 @@ class ViewController: UIViewController {
                                                                     switch(result) {
                                                                     case .success:
                                                                         print("Deleted item: \(toDeleteTodo.name)")
+                                                                        self.queryTodo()
                                                                     case .failure(let error):
                                                                         print("Could not update data in Datastore: \(error)")
                                                                     }
@@ -165,6 +170,23 @@ extension ViewController : UITableViewDelegate, UITableViewDataSource {
         return UITableViewCell()
     }
     
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let item = todoArrayList[indexPath.row]
+        let alertController = UIAlertController(title: item.name, message: item.description, preferredStyle: UIAlertController.Style.alert)
+        
+        let saveAction = UIAlertAction(title: "삭제", style: UIAlertAction.Style.default, handler: { alert -> Void in
+            self.deleteTodo(item.name)
+        })
+        let cancelAction = UIAlertAction(title: "취소", style: UIAlertAction.Style.default, handler: {
+            (action : UIAlertAction!) -> Void in })
+        
+        
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        
+        self.present(alertController, animated: true, completion: nil)
+        
+        
+    }
     
 }
